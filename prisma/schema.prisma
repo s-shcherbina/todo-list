@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Task {
+  id Int @id @default(autoincrement())
+
+  title String
+  description String?
+  status TaskStatusEnum @default(new)
+
+  userId Int @map("user_id")
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("tasks")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  email String @unique
+  hashedPassword String? @map("hashed_password")
+
+  tasks Task[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+enum TaskStatusEnum {
+  new
+  doing
+  completed
+  closed
+}
+
+// docker exec -ti hash of the container bash
+// psql -h localhost -p 5432 -U admin -d postgres
